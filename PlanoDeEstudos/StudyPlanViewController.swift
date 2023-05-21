@@ -6,6 +6,7 @@
 //  Copyright © 2017 Eric Brito. All rights reserved.
 
 import UIKit
+import UserNotifications
 
 class StudyPlanViewController: UIViewController {
 
@@ -25,6 +26,18 @@ class StudyPlanViewController: UIViewController {
            let section = tfSection.text {
             let id = "\(Date().timeIntervalSince1970)"
             let studyPlan = StudyPlan(course: course, section: section, date: dpDate.date, done: false, id: id)
+            
+            let content = UNMutableNotificationContent()
+            content.title = "Lembrete"
+            content.subtitle = "Matéria: \(studyPlan.course)"
+            content.body = "Estudar \(studyPlan.section)"
+            // content.sound = UNNotificationSound(named: "arquivodesom.caf")
+            content.categoryIdentifier = "Lembrete"
+            
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 15, repeats: false)
+            
+            let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
+            UNUserNotificationCenter.current().add(request)
             
             sm.addPlan(studyPlan)
             navigationController?.popViewController(animated: true)

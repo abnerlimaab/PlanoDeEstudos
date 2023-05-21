@@ -13,11 +13,48 @@ import UserNotifications
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    var center = UNUserNotificationCenter.current()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
         window?.tintColor = UIColor(named: "main")
+        
+        center.delegate = self
+        configNotification()
+        
         return true
+    }
+    
+    func configNotification() {
+        center.getNotificationSettings { settings in
+            if settings.authorizationStatus == .notDetermined {
+                let options: UNAuthorizationOptions = [
+                    .alert,
+                    .sound,
+                    .badge,
+                    .carPlay
+                ]
+                self.center.requestAuthorization(options: options) { success, error in
+                    if error == nil {
+                        print(success)
+                    } else {
+                        print(error!.localizedDescription)
+                    }
+                }
+            } else if settings.authorizationStatus == .denied {
+                print("Usuário negou a Notificação")
+            }
+        }
+        
+        let confirmAction = UNNotificationAction(identifier: "confirm", title: "Já estudei", options: [
+            .foreground
+        ])
+        let cancelAction = UNNotificationAction(identifier: "cancel", title: "Cancelar")
+        let category = UNNotificationCategory(identifier: "Lembrete", actions: [confirmAction, cancelAction], intentIdentifiers: [], hiddenPreviewsBodyPlaceholder: "", options: [
+            .customDismissAction
+        ])
+        
+        center.setNotificationCategories([category])
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
@@ -42,4 +79,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
+}
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    
 }
